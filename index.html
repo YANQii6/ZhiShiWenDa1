@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电脑节知识问答</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+        body {
+            background-color: #f0f5ff;
+            padding: 15px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e6efff;
+        }
+        .title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            font-size: 14px;
+            color: #64748b;
+        }
+        .progress-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 12px 15px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+        }
+        .score-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #16a34a;
+        }
+        .progress-text {
+            font-size: 16px;
+            color: #475569;
+        }
+        .question-item {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background-color: #fafbfc;
+        }
+        .question-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 18px;
+            line-height: 1.6;
+        }
+        .option-item {
+            margin-bottom: 12px;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .option-item:hover {
+            background-color: #f1f5f9;
+        }
+        .option-item.selected {
+            background-color: #dbeafe;
+            border: 1px solid #2563eb;
+        }
+        .option-item.correct {
+            background-color: #dcfce7;
+            border: 1px solid #16a34a;
+        }
+        .option-item.wrong {
+            background-color: #fee2e2;
+            border: 1px solid #dc2626;
+        }
+        .option-item.disabled {
+            pointer-events: none;
+        }
+        .option-item input {
+            margin-right: 10px;
+        }
+        .answer-tip {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            display: none;
+        }
+        .tip-correct {
+            background-color: #dcfce7;
+            color: #15803d;
+            display: block;
+        }
+        .tip-wrong {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            display: block;
+        }
+        .action-btn {
+            width: 100%;
+            height: 50px;
+            background-color: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+        .action-btn:hover {
+            background-color: #3b82f6;
+        }
+        .action-btn:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+        .result-panel {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        .success-panel {
+            background-color: #dcfce7;
+            border: 2px solid #16a34a;
+        }
+        .fail-panel {
+            background-color: #fee2e2;
+            border: 2px solid #dc2626;
+        }
+        .result-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .success-title {
+            color: #15803d;
+        }
+        .fail-title {
+            color: #b91c1c;
+        }
+        .result-score {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        .success-score {
+            color: #15803d;
+        }
+        .fail-score {
+            color: #b91c1c;
+        }
+        .result-desc {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .success-desc {
+            color: #166534;
+        }
+        .fail-desc {
+            color: #991b1b;
+        }
+        .result-tip {
+            font-size: 16px;
+            font-weight: 600;
+            padding: 12px;
+            background-color: #fff;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .restart-btn {
+            width: 100%;
+            height: 48px;
+            background-color: #fff;
+            border: 1px solid #2563eb;
+            color: #2563eb;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部标题（已移除专属活动字样） -->
+        <div class="header">
+            <div class="title">电脑节知识问答</div>
+            <div class="subtitle">信息科学与工程学院</div>
+        </div>
+
+        <!-- 进度与得分栏 -->
+        <div class="progress-box" id="progressBox">
+            <div class="score-text">当前得分：<span id="currentScore">0</span> 分</div>
+            <div class="progress-text">第 <span id="currentIndex">1</span> 题 / 共10题</div>
+        </div>
+
+        <!-- 题目容器 -->
+        <div id="questionContainer"></div>
+
+        <!-- 对错提示 -->
+        <div class="answer-tip" id="answerTip"></div>
+
+        <!-- 操作按钮 -->
+        <button class="action-btn" id="actionBtn">提交本题答案</button>
+
+        <!-- 结果面板-通关 -->
+        <div class="result-panel success-panel" id="successPanel">
+            <div class="result-title success-title">🎉 恭喜通关！</div>
+            <div class="result-score success-score">最终得分：<span id="finalSuccessScore">0</span> 分</div>
+            <div class="result-desc success-desc">你已达到80分及以上的通关要求，完成本次知识问答挑战</div>
+            <div class="result-tip">请向工作人员出示本页面，领取活动印章</div>
+            <button class="restart-btn" onclick="window.location.reload()">重新答题</button>
+        </div>
+
+        <!-- 结果面板-未通关 -->
+        <div class="result-panel fail-panel" id="failPanel">
+            <div class="result-title fail-title">❌ 很遗憾，未通关</div>
+            <div class="result-score fail-score">最终得分：<span id="finalFailScore">0</span> 分</div>
+            <div class="result-desc fail-desc">通关要求为80分及以上，欢迎重新答题挑战</div>
+            <button class="restart-btn" onclick="window.location.reload()">重新答题</button>
+        </div>
+    </div>
+
+    <script>
+        // ===================== 10组题库（100%还原你提供的内容，无任何修改）=====================
+        const questionGroups = [
+            // 第1组（完全匹配你提供的第1组题目）
+            [
+                {
+                    id: 1,
+                    title: "关于“强人工智能”（AGI，即通用人工智能）与“弱人工智能”的区别，以下描述正确的是：",
+                    options: ["A. 强人工智能只能在单一领域下棋，弱人工智能什么都能做", "B. 强人工智能指具备人类水平的通用智能，能解决跨领域的未知问题", "C. 弱人工智能是指算力很弱、经常死机的人工智能", "D. 强人工智能已经普及到每个人的手机中"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 2,
+                    title: "我们在短视频平台常看到的“一键让老照片里的人笑起来”的功能，主要依靠的是？",
+                    options: ["A. 魔法", "B. 人工智能图像处理技术", "C. 屏幕反光错觉", "D. 物理光学原理"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 3,
+                    title: "在医院里，AI通过分析X光片来辅助医生寻找病灶，这属于AI在哪个领域的应用？",
+                    options: ["A. 医疗影像分析（计算机视觉）", "B. 语音合成", "C. 智能客服", "D. 机器翻译"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 4,
+                    title: "在没有人工给出“标准答案”的情况下，让AI自己去海量数据中寻找规律并进行分类，这属于哪种学习方式？",
+                    options: ["A. 监督学习", "B. 无监督学习", "C. 强化学习", "D. 机械学习"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 5,
+                    title: "制造极其精密、昂贵的高科技芯片，其最基础的核心半导体原材料，其实在地球上非常常见，它是？",
+                    options: ["A. 从沙子中提炼出的“硅”（Silicon）", "B. 从海水中提炼的盐", "C. 纯黄金", "D. 塑料"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 6,
+                    title: "如果把我们的电脑主板比作一座繁忙的城市，那么“芯片”在这座城市里的角色更像是？",
+                    options: ["A. 城市的绿化带", "B. 负责处理海量信息和下达指令的市政办公大楼", "C. 城市的下水管道", "D. 路边的广告牌"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 7,
+                    title: "现在的家电越来越聪明了，哪怕是一个看似普通的“智能电饭煲”，也能连上Wi-Fi让你在下班路上用手机远程控制煮饭。这是因为？",
+                    options: ["A. 电饭煲内部也装有微型的控制芯片和通信模块", "B. 大米本身具有导电和发射信号的功能", "C. 电饭煲的金属外壳是个大天线", "D. 厨房里的路由器发出了高温"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 8,
+                    title: "下列哪个设备不属于计算机输出设备的是？",
+                    options: ["A. 打印机", "B. 显示器", "C. 键盘", "D. 音箱"],
+                    answer: ["C"],
+                    score: 10
+                },
+                {
+                    id: 9,
+                    title: "下列哪一款软件属于“操作系统”（OS）？",
+                    options: ["A. Microsoft Word", "B. Windows 11", "C. 微信", "D. Adobe Photoshop"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 10,
+                    title: "在电竞显示器中，“144Hz”或“240Hz”的“Hz（赫兹）”指的是屏幕的什么？",
+                    options: ["A. 刷新率（每秒刷新画面的次数）", "B. 声音大小", "C. 屏幕尺寸", "D. 充电速度"],
+                    answer: ["A"],
+                    score: 10
+                }
+            ],
+            // 第2组（完全匹配你提供的第2组题目）
+            [
+                {
+                    id: 1,
+                    title: "现在流行的“大语言模型”（如DeepSeek、GPT）主要擅长处理什么类型的数据？",
+                    options: ["A. 只有图像和视频", "B. 只有数字表格", "C. 文本、代码以及部分多模态内容", "D. 仅限物理化学实验数据"],
+                    answer: ["C"],
+                    score: 10
+                },
+                {
+                    id: 2,
+                    title: "手机上的语音助手（如Siri、小爱同学）算人工智能吗？",
+                    options: ["A. 不是，它们只是普通的录音播放设备", "B. 是的，它们属于人工智能在语音识别和自然语言处理方面的应用", "C. 只有在连接5G网络时才算人工智能", "D. 不是，它们是人工在后台实时回复的"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 3,
+                    title: "以下哪种行为属于负责任且符合伦理地使用AI？",
+                    options: ["A. 用AI伪造他人的声音和视频进行诈骗", "B. 隐瞒使用AI生成论文的事实", "C. 使用AI辅助整理学习笔记并核实其准确性", "D. 让AI自动生成恶意代码攻击网站"],
+                    answer: ["C"],
+                    score: 10
+                },
+                {
+                    id: 4,
+                    title: "AI训练中的“强化学习”，其核心机制类似于：",
+                    options: ["A. 查字典", "B. 照相机拍照", "C. 宠物训练（做对了给奖励，做错了给惩罚）", "D. 听写默写"],
+                    answer: ["C"],
+                    score: 10
+                },
+                {
+                    id: 5,
+                    title: "你的手机越用越热，特别是在玩大型3D游戏或者看高清视频时，这些热量主要来自于哪里？",
+                    options: ["A. 手机壳捂出来的", "B. 手机内部的芯片（如CPU、GPU）在高速运算时散发的热量", "C. 摄像头的镜头摩擦", "D. 手机按键"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 6,
+                    title: "为什么芯片制造厂的核心区域必须是要求极高的“无尘室”？",
+                    options: ["A. 为了让员工不弄脏衣服", "B. 因为肉眼看不见的微小灰尘一旦落上，就会导致极其微细的芯片电路短路报废", "C. 为了节约打扫卫生的成本", "D. 为了防盗"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 7,
+                    title: "在现代社会，如果世界上所有的芯片突然全部消失了，以下哪个场景最有可能发生？",
+                    options: ["A. 太阳不再升起", "B. 我们立刻无法使用手机、电脑，高铁停运，网络中断", "C. 树木停止生长", "D. 河里的鱼儿不能游泳"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 8,
+                    title: "在Windows系统中，要把一个文件彻底删除（不进入回收站），通常可以按哪个快捷键？",
+                    options: ["A. Ctrl + V", "B. Shift + Delete", "C. Ctrl + Z", "D. Alt + F4"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 9,
+                    title: "像苹果的iCloud、百度网盘这样，把数据存储在远程服务器上，让你随时随地可以下载的技术属于：",
+                    options: ["A. 边缘计算", "B. 云计算与云存储", "C. 局域网共享", "D. 光盘刻录"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 10,
+                    title: "会将你的文件全部加密锁死，然后勒索你交赎金（如比特币）才能解锁的恶意软件是？",
+                    options: ["A. 广告弹窗", "B. 勒索病毒", "C. 网页木马", "D. 挖矿脚本"],
+                    answer: ["B"],
+                    score: 10
+                }
+            ],
+            // 第3组（完全匹配你提供的第3组题目）
+            [
+                {
+                    id: 1,
+                    title: "当我们出国旅游，用手机镜头对准全英文的菜单，屏幕上的英文瞬间自动变成了中文，这主要归功于什么技术？",
+                    options: ["A. 人工智能图像识别与机器翻译技术", "B. 手机镜头的物理反光折射", "C. 跨国的高速5G网络传输", "D. 字典厂家的纯人工后台回复"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 2,
+                    title: "淘宝、抖音给你推荐你喜欢的东西，用的是什么技术？",
+                    options: ["A. 蓝牙局域网传输技术", "B. 虚拟现实（VR）技术", "C. 人工智能与个性化推荐算法", "D. 3D打印技术"],
+                    answer: ["C"],
+                    score: 10
+                },
+                {
+                    id: 3,
+                    title: "“机器翻译”功能（如将英文网页自动翻译成中文）主要运用了人工智能的什么技术？",
+                    options: ["A. 图像渲染", "B. 自然语言处理（NLP）", "C. 区块链", "D. 虚拟现实（VR）"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 4,
+                    title: "在我们的日常生活中，以下哪项通常【不属于】人工智能的应用？",
+                    options: ["A. 扫地机器人自动规划路线避开障碍物", "B. 手机相册自动把同一个人的照片分类", "C. 骑传统的脚踏自行车去上课", "D. 进出校园时的刷脸闸机"],
+                    answer: ["C"],
+                    score: 10
+                },
+                {
+                    id: 5,
+                    title: "关于AI与IC的发展，下列说法正确的是？",
+                    options: ["A. AI算法的进步完全不需要依赖芯片性能", "B. 先进制程芯片为大模型训练提供了算力支撑", "C. 伦理问题仅存在于AI领域，与IC无关", "D. 集成电路的发展与人工智能没有关联"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 6,
+                    title: "如今的智能手机越来越轻薄，但拍照、打游戏的功能却越来越强大，这主要得益于芯片的内部结构变得越来越？",
+                    options: ["A. 庞大", "B. 微小且精密（集成了更多的晶体管）", "C. 沉重", "D. 柔软"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 7,
+                    title: "我们经常听到国产手机发布会上宣传“搭载了最新一代的旗舰芯片”，这主要意味着这部手机的什么能力提升了？",
+                    options: ["A. 运行软件的速度和整体性能", "B. 手机屏幕的物理尺寸变大了", "C. 手机外壳变得更耐摔了", "D. 手机变得更重了"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 8,
+                    title: "我们常说的“CPU”，它的中文全称是？",
+                    options: ["A. 中央处理器", "B. 电脑操作系统", "C. 显示适配器", "D. 内部存储器"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 9,
+                    title: "相比传统的机械硬盘（HDD），现在的固态硬盘（SSD）最大的优点是：",
+                    options: ["A. 不怕水泡", "B. 读写速度极快且防震", "C. 重量特别重", "D. 必须插光盘使用"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 10,
+                    title: "当你的手机突然弹窗警告“存储空间即将耗尽，手机可能变卡”时，以下哪种操作能真正帮你腾出空间、缓解卡顿？",
+                    options: ["A. 调低手机屏幕的亮度", "B. 删除手机相册里没用的超长视频和几百年不打开的APP", "C. 给手机换一个散热更好的新手机壳", "D. 把手机电池充到100%"],
+                    answer: ["B"],
+                    score: 10
+                }
+            ],
+            // 第4组（完全匹配你提供的第4组题目）
+            [
+                {
+                    id: 1,
+                    title: "当你在拍照时，手机能自动识别出“人脸”并框起来，这主要用到了下面哪种技术？",
+                    options: ["A. 蓝牙传输", "B. 无线充电", "C. 人工智能（计算机视觉）", "D. 5G通信"],
+                    answer: ["C"],
+                    score: 10
+                },
+                {
+                    id: 2,
+                    title: "现在很火的一些大模型，如DeepSeek 豆包，属于什么技术？",
+                    options: ["A. 生成式人工智能（大语言模型）", "B. 区块链与加密数字货币", "C. 北斗卫星定位系统", "D. 量子加密通信"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 3,
+                    title: "在和AI交流时，什么是“算法幻觉”（AI Hallucination）？",
+                    options: ["A. AI模型产生了真实的自我意识", "B. AI在回答时一本正经地胡说八道或捏造虚假事实", "C. 电脑屏幕闪烁产生的视觉错觉", "D. 程序员写代码时产生的灵感"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 4,
+                    title: "我们平时上下班打卡的“指纹识别”或“人脸识别”，统称为？",
+                    options: ["A. 生物识别技术", "B. 射频识别技术", "C. 条形码技术", "D. 纳米技术"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 5,
+                    title: "集成电路（IC）的核心功能不包括以下哪一项？",
+                    options: ["A. 信号处理", "B. 数据存储", "C. 能源发电", "D. 逻辑运算"],
+                    answer: ["C"],
+                    score: 10
+                },
+                {
+                    id: 6,
+                    title: "除了手机、电脑和电视，以下哪个日常物品里【通常也会】装有负责处理信息的芯片？",
+                    options: ["A. 指纹密码智能门锁", "B. 纯木头做的椅子", "C. 陶瓷茶杯", "D. 纯棉毛巾"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 7,
+                    title: "相比于手机芯片，汽车芯片（车规级芯片）通常对哪方面的要求更为严苛？",
+                    options: ["A. 外观是否漂亮", "B. 极端温度下的稳定性和使用寿命", "C. 打游戏是否流畅", "D. 拍照像素高低"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 8,
+                    title: "我们在电脑上打字写文章时，如果发现光标前面的那个字打错了，最常用的用来删除的按键是？",
+                    options: ["A. Backspace (退格键)", "B. Space (空格键)", "C. Enter (回车键)", "D. F1"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 9,
+                    title: "许多知名的软件（如Linux系统、OBS直播软件）都是“开源”的，开源通常意味着：",
+                    options: ["A. 软件的代码是公开的，允许人们检查、修改和分发", "B. 软件只能在开机时使用", "C. 软件必须花钱买", "D. 软件容易感染病毒"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 10,
+                    title: "当我们买手机时，导购说这部手机的“存储空间是256G”，这里的256G主要决定了手机的什么？",
+                    options: ["A. 手机屏幕有多亮", "B. 手机里能装下多少个APP软件、保存多少张照片和视频", "C. 手机电池充满电能用多少天", "D. 手机拍照的像素有多高"],
+                    answer: ["B"],
+                    score: 10
+                }
+            ],
+            // 第5组（完全匹配你提供的第5组题目）
+            [
+                {
+                    id: 1,
+                    title: "“图灵测试”是用来判断什么的？",
+                    options: ["A. 一台机器是否具备人类水平的智能", "B. 一台电脑的运算速度有多快", "C. 一个AI模型会不会说谎", "D. 一款芯片的功耗高低"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 2,
+                    title: "著名的人工智能程序AlphaGo（阿尔法狗）曾在哪个棋类项目中击败了人类世界冠军？",
+                    options: ["A. 象棋", "B. 围棋", "C. 五子棋", "D. 跳棋"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 3,
+                    title: "智能家居系统中，能够集中控制各个智能设备并与人语音对话的“中枢”通常是？",
+                    options: ["A. 智能音箱", "B. 机械门锁", "C. 节能灯泡", "D. 扫地机器人的刷子"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 4,
+                    title: "当我们向AI（如ChatGPT或豆包）提问时，要想得到更准确、更有用的回答，我们应该怎么做？",
+                    options: ["A. 把问题描述得尽量清晰、具体，提供背景信息", "B. 随便打几个错别字让它猜", "C. 只发一个问号过去", "D. 拔掉路由器的网线"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 5,
+                    title: "我们日常使用的手机芯片，属于哪一类集成电路？",
+                    options: ["A. 模拟集成电路", "B. 数字集成电路", "C. 数模混合集成电路", "D. 功率集成电路"],
+                    answer: ["C"],
+                    score: 10
+                },
+                {
+                    id: 6,
+                    title: "在很多科幻电影里，有把芯片植入人体的桥段。在现实的医疗领域，确实有类似的技术在造福人类，比如用来帮助听障人士的？",
+                    options: ["A. 人工耳蜗植入体（内含芯片处理声音）", "B. 钢铁机械臂", "C. 蓝牙外放音箱", "D. 医院的X光机"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 7,
+                    title: "为什么我们现在的U盘只有大拇指那么小，却可以存下几万张照片和好几部高清电影？",
+                    options: ["A. 因为使用了高度集成、容量巨大的存储芯片", "B. 因为里面装了极小的微缩胶卷", "C. 因为里面塞了一张光盘", "D. 因为它连接了外星科技"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 8,
+                    title: "如果你想在一个长篇文档或网页中快速搜索某个词，应该使用哪个快捷键呼出查找框？",
+                    options: ["A. Ctrl + F", "B. Ctrl + P", "C. Alt + Tab", "D. Windows + D"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 9,
+                    title: "在计算机网络中，用来防止外部黑客或未经授权的访问侵入内部网络的系统叫做：",
+                    options: ["A. 承重墙", "B. 防火墙", "C. 杀毒药水", "D. 隔离带"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 10,
+                    title: "为了弥补CPU运算速度太快而内存读取速度太慢之间的差距，CPU内部设立了什么来临时存储急需的数据？",
+                    options: ["A. 缓存（Cache）", "B. U盘", "C. 光驱", "D. 冷却液"],
+                    answer: ["A"],
+                    score: 10
+                }
+            ],
+            // 第6组（完全匹配你提供的第6组题目）
+            [
+                {
+                    id: 1,
+                    title: "被称为“人工智能之父”的科学家是？",
+                    options: ["A. 冯·诺依曼", "B. 图灵", "C. 香农", "D. 摩尔"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 2,
+                    title: "当我们用手机输入法的“语音输入”功能，把说话的声音瞬间变成文字时，主要用到了人工智能的什么技术？",
+                    options: ["A. 语音识别", "B. 自动驾驶", "C. 虚拟现实", "D. 人脸识别"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 3,
+                    title: "现在很多写作软件具备“AI帮写”功能，你可以输入几个关键词，它就自动帮你生成一篇草稿，这属于？",
+                    options: ["A. 文本生成式AI", "B. 物理化学模拟", "C. 3D打印技术", "D. 蓝牙配对"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 4,
+                    title: "如今的AI已经可以自己作曲写歌了，这说明AI在哪个领域取得了进展？",
+                    options: ["A. 物理制造", "B. 艺术创造力（生成式AI）", "C. 农业种植", "D. 航空航天"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 5,
+                    title: "我们常说的“芯片”，在专业上的正式名称是？",
+                    options: ["A. 集成电路（IC）", "B. 电路板", "C. 电阻", "D. 电容"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 6,
+                    title: "虽然芯片很强大，但它也非常娇贵。在日常生活中，哪种意外情况最容易让电子产品里的芯片彻底损坏？",
+                    options: ["A. 每天给手机正常充电", "B. 手机严重进水导致内部电路短路烧毁", "C. 把手机屏幕亮度调到最高", "D. 频繁更换手机壁纸"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 7,
+                    title: "现在的手机芯片不仅有CPU，还把GPU（图形处理器）、NPU（神经网络处理器）等全都集成在一块芯片上，这被称为：",
+                    options: ["A. SoC（系统级芯片）", "B. PCB（印制电路板）", "C. USB", "D. NFC"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 8,
+                    title: "如果你的电脑突然死机卡住了，鼠标怎么点都没反应，按键盘也没用，最简单粗暴的解决方法通常是？",
+                    options: ["A. 把显示器砸了", "B. 长按电脑的电源键几秒钟，强制重启电脑", "C. 给电脑主机浇点凉水降温", "D. 大声对着电脑喊叫命令它动起来"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 9,
+                    title: "为了保护自己的社交账号、银行卡密码安全，以下哪种做法是【绝对错误】的？",
+                    options: ["A. 密码设置得稍微复杂一点，包含大小写字母和数字", "B. 为了图省事，把所有软件账号和银行卡都设置成同一个极其简单的密码（如123456）", "C. 绝不随意把密码透露给网络上的陌生人", "D. 感觉密码泄露时立刻修改密码"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 10,
+                    title: "计算机底层处理的所有数据（文字、图片、视频等），最终都是以什么形式存储和运算的？",
+                    options: ["A. 中文和英文", "B. 0和1组成的二进制代码", "C. 十进制数字", "D. 物理电流"],
+                    answer: ["B"],
+                    score: 10
+                }
+            ],
+            // 第7组（完全匹配你提供的第7组题目）
+            [
+                {
+                    id: 1,
+                    title: "以下哪项属于生成式AI的典型应用？",
+                    options: ["A. 图像分类", "B. 语音识别", "C. 文本生成", "D. 数据聚类"],
+                    answer: ["C"],
+                    score: 10
+                },
+                {
+                    id: 2,
+                    title: "自动驾驶汽车用来探测周围环境、被称为车辆“眼睛”的核心传感器通常是？",
+                    options: ["A. 激光雷达与摄像头", "B. 排气管", "C. 倒车镜", "D. 转向灯"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 3,
+                    title: "为了让AI生成更符合我们需求的内容，我们需要精心设计输入给AI的指令。这个过程被称为：",
+                    options: ["A. 硬件组装", "B. 提示词工程（Prompt Engineering）", "C. 系统重装", "D. 芯片焊接"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 4,
+                    title: "“元宇宙”概念中，提供虚拟世界沉浸感的重要技术支撑除了VR/AR，还有哪一项能为其注入“灵魂”与智能交互？",
+                    options: ["A. 人工智能（AI）", "B. 蒸汽机技术", "C. 有线电视网", "D. 传统收音机"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 5,
+                    title: "手机和电脑里最核心的部件叫什么？",
+                    options: ["A. 液晶触控屏幕", "B. 大容量锂电池", "C. 芯片（如CPU等集成电路）", "D. 高清摄像头模组"],
+                    answer: ["C"],
+                    score: 10
+                },
+                {
+                    id: 6,
+                    title: "像台积电（TSMC）这样，自己不设计芯片，只专门帮别人制造芯片的模式被称为：",
+                    options: ["A. 晶圆代工（Foundry）模式", "B. 零售模式", "C. 直播带货模式", "D. 众筹模式"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 7,
+                    title: "玩家经常说的“超频”，指的是让芯片：",
+                    options: ["A. 在低于额定频率下运行以省电", "B. 超过官方设定的频率运行，以榨取更高性能（但发热会大增）", "C. 改变它的形状", "D. 换一个更大尺寸的屏幕"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 8,
+                    title: "我们在用浏览器上网时，遇到一个非常好看的网页想存下来以后方便看，这个操作通常被称为？",
+                    options: ["A. 添加书签/加入收藏夹", "B. 格式化硬盘", "C. 给网页杀毒", "D. 重装电脑系统"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 9,
+                    title: "每一台连接到互联网的设备都会分配到一个数字标签，相当于设备在网络上的“门牌号”，这是：",
+                    options: ["A. 身份证号", "B. IP地址", "C. 邮政编码", "D. 车牌号"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 10,
+                    title: "我们通过文件名的后缀来判断文件类型，以下哪个后缀通常表示这是一张图片？",
+                    options: ["A. .mp4", "B. .docx", "C. .jpg", "D. .exe"],
+                    answer: ["C"],
+                    score: 10
+                }
+            ],
+            // 第8组（完全匹配你提供的第8组题目）
+            [
+                {
+                    id: 1,
+                    title: "以下哪一项是人工智能（AI）的核心基础技术？",
+                    options: ["A. 量子通信", "B. 机器学习", "C. 5G通信", "D. 区块链"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 2,
+                    title: "人工智能大模型就像一个刻苦的学生，它需要大量的什么来“阅读”和学习，才能变得越来越聪明？",
+                    options: ["A. 纯净的矿泉水", "B. 海量的数据（如文章、书籍、网页）", "C. 硅胶材料", "D. 汽油"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 3,
+                    title: "如果我们在网上看到一段名人说话的视频，但其实他本人从来没说过这些话，这最可能是被使用了哪种技术？",
+                    options: ["A. AI深度伪造（换脸/拟声）技术", "B. 手机美颜滤镜", "C. 视频快进播放", "D. 5G高速网络"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 4,
+                    title: "我们在登录网站时，经常需要点击“找出图中所有的红绿灯”，这其实是在？",
+                    options: ["A. 帮助网站老板考驾照", "B. 防止恶意机器人，同时用人类的智慧帮AI标注数据", "C. 提高网站的加载速度", "D. 测试你的鼠标坏没坏"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 5,
+                    title: "为什么说芯片是电子产品的“大脑”？",
+                    options: ["A. 因为芯片的物理形状和人类大脑一模一样", "B. 因为芯片具备人类真正的情感和自主意识", "C. 因为它里面装满了生物神经元细胞", "D. 因为它负责执行逻辑运算、处理信息并指挥控制整个设备的运行"],
+                    answer: ["D"],
+                    score: 10
+                },
+                {
+                    id: 6,
+                    title: "电脑在运行大型游戏或AI任务时，风扇会狂转，这是因为芯片在高速运算时会：",
+                    options: ["A. 产生大量的热能", "B. 产生大量水分", "C. 缩小体积", "D. 吸收周围的冷气"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 7,
+                    title: "关于芯片制造的难度，下面哪种描述最贴近真实的科技现状？",
+                    options: ["A. 随便找个铁匠铺用锤子就能敲出来", "B. 它是人类历史上最复杂的精密制造工艺之一，需要极度无尘的环境和昂贵的设备", "C. 就像在厨房蒸馒头一样简单", "D. 主要是用木头纯手工雕刻出来的"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 8,
+                    title: "如果你的手机或电脑在家里无法连接Wi-Fi上网，排除了欠费原因后，首先应该重启的设备通常是？",
+                    options: ["A. 打印机", "B. 路由器", "C. 蓝牙音箱", "D. 电视遥控器"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 9,
+                    title: "电脑机箱里，用来把CPU、内存、显卡、硬盘等所有部件连接在一起的那个大块的电路板叫作：",
+                    options: ["A. 显卡", "B. 电源", "C. 主板（Motherboard）", "D. 键盘"],
+                    answer: ["C"],
+                    score: 10
+                },
+                {
+                    id: 10,
+                    title: "我们在使用公共场所的电脑（比如打印店、学校机房、图书馆）查资料后，离开前一定要记得做的一件事是？",
+                    options: ["A. 退出登录自己的私人账号（如微信、邮箱等），防止被他人冒用", "B. 用湿毛巾把电脑屏幕仔细擦一遍", "C. 拿螺丝刀把电脑主板拆走带回家", "D. 把公用键盘装进书包带走"],
+                    answer: ["A"],
+                    score: 10
+                }
+            ],
+            // 第9组（完全匹配你提供的第9组题目）
+            [
+                {
+                    id: 1,
+                    title: "以下哪一项是人工智能在日常生活中的典型应用？",
+                    options: ["A. 智能语音助手（如Siri、小爱同学）", "B. 太阳能电池板", "C. 机械手表", "D. 普通白炽灯"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 2,
+                    title: "人工智能进行“深度学习”（Deep Learning）主要依赖于哪种结构的算法模型？",
+                    options: ["A. 决策树", "B. 冒泡排序", "C. 人工神经网络", "D. 线性回归"],
+                    answer: ["C"],
+                    score: 10
+                },
+                {
+                    id: 3,
+                    title: "我们在刷短视频时，总是会刷到自己喜欢看的内容，久而久之视野变窄，这种由推荐算法带来的现象被称为？",
+                    options: ["A. 信息茧房", "B. 蝴蝶效应", "C. 海市蜃楼", "D. 墨菲定律"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 4,
+                    title: "能够记录你的心率、步数并用AI算法分析你健康状况的智能手表，属于哪类设备？",
+                    options: ["A. 可穿戴智能设备", "B. 大型服务器", "C. 传统钟表", "D. 医疗器械"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 5,
+                    title: "美国的“硅谷”因什么产业而得名？",
+                    options: ["A. 旅游业", "B. 半导体及集成电路产业（使用硅材料）", "C. 玻璃制造", "D. 硅胶整形"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 6,
+                    title: "所谓“半导体”，指的是它的导电性能介于哪两者之间？",
+                    options: ["A. 水和火之间", "B. 导体（如金属）和绝缘体（如橡胶）之间", "C. 固体和气体之间", "D. 电池与电线之间"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 7,
+                    title: "未来可能颠覆传统硅基芯片算力，利用量子力学原理进行运算的前沿技术是？",
+                    options: ["A. 算盘计算", "B. 量子计算", "C. 蒸汽计算", "D. 光学投影"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 8,
+                    title: "收到一封伪装成银行的邮件，提示你“账号异常，请点击链接输入密码”，这很可能是？",
+                    options: ["A. 系统的正常通知", "B. 钓鱼邮件（网络诈骗）", "C. 杀毒软件的提示", "D. 朋友的恶作剧"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 9,
+                    title: "在我们的电脑桌面上，那个长得像个小垃圾桶一样的图标，它的主要作用是？",
+                    options: ["A. 回收站（用来暂存你刚刚删除的文件，还有机会找回）", "B. 杀毒软件的快捷方式", "C. 音乐播放器", "D. 用来清理键盘灰尘的工具"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 10,
+                    title: "在操作电脑或者手机时，遇到超过90%的莫名其妙的卡顿、死机、软件无响应等软故障，最简单粗暴且通常有效的排障第一步是？",
+                    options: ["A. 拆开机箱清灰", "B. 重启设备（Reboot）", "C. 重新注册一个账号", "D. 拔掉网线"],
+                    answer: ["B"],
+                    score: 10
+                }
+            ],
+            // 第10组（完全匹配你提供的第10组题目）
+            [
+                {
+                    id: 1,
+                    title: "关于我们平时使用的AI聊天机器人（比如我），下列描述最准确的是？",
+                    options: ["A. 它能像人类一样拥有真正的自我意识和情感", "B. 它是基于大数据和算法生成回应的智能程序", "C. 它的回答永远100%正确，不需要任何辨别", "D. 它只能和你聊与电脑有关的话题"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 2,
+                    title: "训练一个强大的人工智能大模型，最重要的“燃料”是什么？",
+                    options: ["A. 海量的数据", "B. 纯净的水资源", "C. 汽油与柴油", "D. 高清显示器"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 3,
+                    title: "我们在网购时，经常遇到秒回消息的“店铺客服”，它们不知疲倦且回答非常标准，它们大概率是？",
+                    options: ["A. AI智能客服机器人", "B. 很多个真人轮班倒", "C. 店长本人", "D. 网页中毒了"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 4,
+                    title: "关于“AI会取代人类工作”的担忧，目前科技界较普遍的共识是：",
+                    options: ["A. AI明天就会取代所有的工作", "B. AI完全没用，取代不了任何人", "C. AI会取代部分重复性劳动，但同时也会创造出如“AI训练师”等新岗位", "D. AI只会取代老板"],
+                    answer: ["C"],
+                    score: 10
+                },
+                {
+                    id: 5,
+                    title: "工程师在设计极其复杂的芯片图纸时，离不开一种叫“EDA”的工具，它指的是：",
+                    options: ["A. 电子设计自动化软件", "B. 一种高级打印机", "C. 快递分拣系统", "D. 电子显微镜"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 6,
+                    title: "如果我们要描述一个顶级芯片内部的电路有多么复杂，通常会用什么数量级来衡量里面“晶体管”（相当于小开关）的数量？",
+                    options: ["A. 几十个", "B. 几百个", "C. 动辄数十亿甚至上百亿个", "D. 只有1个"],
+                    answer: ["C"],
+                    score: 10
+                },
+                {
+                    id: 7,
+                    title: "当我们去便利店买水，掏出手机扫码支付时，只用了一秒钟就完成了扣款和页面跳转，这背后主要依靠的是？",
+                    options: ["A. 银行员工在后台光速敲键盘", "B. 手机芯片的高速运算以及网络的快速传输", "C. 手机摄像头的反光原理", "D. 手机屏幕的亮度够高"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 8,
+                    title: "手机网络中的“5G”，字母G代表的是什么意思？",
+                    options: ["A. Generation（代），即第五代移动通信技术", "B. Gigabyte（千兆字节，流量单位）", "C. Gravity（重力）", "D. Global（全球）"],
+                    answer: ["A"],
+                    score: 10
+                },
+                {
+                    id: 9,
+                    title: "我们常说屏幕是“1080P”或“4K”的，这指的是屏幕的哪项参数？",
+                    options: ["A. 亮度", "B. 分辨率（屏幕包含的像素点数量）", "C. 对比度", "D. 电池容量"],
+                    answer: ["B"],
+                    score: 10
+                },
+                {
+                    id: 10,
+                    title: "电脑上的“Ctrl+C”和“Ctrl+V”是被誉为办公神器的快捷键，它们代表的操作是？",
+                    options: ["A. 关机和开机", "B. 复制和粘贴", "C. 放大和缩小", "D. 截图和录屏"],
+                    answer: ["B"],
+                    score: 10
+                }
+            ]
+        ];
+        // ===================== 题库结束 =====================
+
+        // 全局变量
+        let currentQuestionList = []; // 当前抽取的10道题
+        let currentIndex = 0; // 当前题号（从0开始）
+        let totalScore = 0; // 累计得分
+        let selectedAnswer = []; // 用户当前选中的答案
+        let isAnswered = false; // 当前题是否已作答
+
+        // 初始化页面
+        window.onload = function() {
+            // 随机抽取一组题库
+            const randomGroupIndex = Math.floor(Math.random() * questionGroups.length);
+            currentQuestionList = questionGroups[randomGroupIndex];
+            // 渲染第一题
+            renderQuestion();
+            // 绑定按钮事件
+            bindBtnEvent();
+        };
+
+        // 渲染当前题目
+        function renderQuestion() {
+            const container = document.getElementById("questionContainer");
+            const currentQuestion = currentQuestionList[currentIndex];
+            selectedAnswer = [];
+            isAnswered = false;
+
+            // 更新进度和得分
+            document.getElementById("currentIndex").innerText = currentIndex + 1;
+            document.getElementById("currentScore").innerText = totalScore;
+            // 重置按钮和提示
+            document.getElementById("actionBtn").innerText = "提交本题答案";
+            document.getElementById("actionBtn").disabled = false;
+            document.getElementById("answerTip").className = "answer-tip";
+            document.getElementById("answerTip").innerText = "";
+
+            // 渲染题目HTML
+            let html = `<div class="question-item">
+                <div class="question-title">${currentQuestion.title}</div>
+                <div class="option-list">`;
+            
+            currentQuestion.options.forEach(option => {
+                const optionValue = option.split(".")[0];
+                html += `<div class="option-item">
+                    <label>
+                        <input type="radio" name="currentQuestion" value="${optionValue}">
+                        ${option}
+                    </label>
+                </div>`;
+            });
+
+            html += `</div></div>`;
+            container.innerHTML = html;
+
+            // 绑定选项选择事件
+            bindOptionEvent();
+        }
+
+        // 绑定选项选择事件
+        function bindOptionEvent() {
+            const allInputs = document.querySelectorAll(".option-item input");
+            allInputs.forEach(input => {
+                input.addEventListener("change", function() {
+                    if (isAnswered) return; // 已作答后禁止修改
+                    const parent = this.closest(".option-item");
+                    // 单选清除其他选中样式
+                    document.querySelectorAll(".option-item").forEach(item => {
+                        item.classList.remove("selected");
+                    });
+                    // 记录当前选择
+                    selectedAnswer = [this.value];
+                    parent.classList.add("selected");
+                });
+            });
+        }
+
+        // 绑定按钮事件
+        function bindBtnEvent() {
+            document.getElementById("actionBtn").addEventListener("click", function() {
+                // 未作答状态：提交答案
+                if (!isAnswered) {
+                    if (selectedAnswer.length === 0) {
+                        alert("请选择你的答案！");
+                        return;
+                    }
+                    submitAnswer();
+                } 
+                // 已作答状态：进入下一题
+                else {
+                    // 判断是否是最后一题
+                    if (currentIndex === currentQuestionList.length - 1) {
+                        showFinalResult();
+                    } else {
+                        currentIndex++;
+                        renderQuestion();
+                    }
+                }
+            });
+        }
+
+        // 提交答案并判分
+        function submitAnswer() {
+            isAnswered = true;
+            const currentQuestion = currentQuestionList[currentIndex];
+            const tipBox = document.getElementById("answerTip");
+            const allOptions = document.querySelectorAll(".option-item");
+
+            // 禁用选项
+            allOptions.forEach(item => {
+                item.classList.add("disabled");
+            });
+
+            // 判断对错
+            const isRight = selectedAnswer.sort().join(",") === currentQuestion.answer.sort().join(",");
+            
+            // 标记正确/错误选项
+            allOptions.forEach(item => {
+                const input = item.querySelector("input");
+                const optionValue = input.value;
+                // 正确答案标绿
+                if (currentQuestion.answer.includes(optionValue)) {
+                    item.classList.add("correct");
+                }
+                // 用户选错的标红
+                if (selectedAnswer.includes(optionValue) && !currentQuestion.answer.includes(optionValue)) {
+                    item.classList.add("wrong");
+                }
+            });
+
+            // 累计得分
+            if (isRight) {
+                totalScore += currentQuestion.score;
+                tipBox.className = "answer-tip tip-correct";
+                tipBox.innerText = "✅ 回答正确！+" + currentQuestion.score + "分";
+            } else {
+                tipBox.className = "answer-tip tip-wrong";
+                tipBox.innerText = "❌ 回答错误！正确答案：" + currentQuestion.answer.join("、");
+            }
+
+            // 更新按钮文本
+            if (currentIndex === currentQuestionList.length - 1) {
+                document.getElementById("actionBtn").innerText = "查看最终结果";
+            } else {
+                document.getElementById("actionBtn").innerText = "进入下一题";
+            }
+        }
+
+        // 显示最终结果
+        function showFinalResult() {
+            // 隐藏答题区域
+            document.getElementById("progressBox").style.display = "none";
+            document.getElementById("questionContainer").style.display = "none";
+            document.getElementById("answerTip").style.display = "none";
+            document.getElementById("actionBtn").style.display = "none";
+
+            // 判断是否通关
+            if (totalScore >= 80) {
+                document.getElementById("finalSuccessScore").innerText = totalScore;
+                document.getElementById("successPanel").style.display = "block";
+            } else {
+                document.getElementById("finalFailScore").innerText = totalScore;
+                document.getElementById("failPanel").style.display = "block";
+            }
+        }
+    </script>
+</body>
+</html>
